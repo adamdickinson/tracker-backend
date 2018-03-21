@@ -1,0 +1,28 @@
+{
+  "name": "tracker-backend",
+  "version": "0.1.0",
+  "description": "Elite Athlete Tracker Backend",
+  "main": "src/index.js",
+  "author": "Adam Dickinson <adam@renegadedigital.com.au>",
+  "license": "MIT",
+  "scripts": {
+    "start": "babel src -d dist && cp src/config/schema.graphql dist/config/ && node dist/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.4",
+    "elasticsearch": "^14.2.1",
+    "express": "^4.16.3",
+    "express-graphql": "^0.6.12",
+    "graphql": "^0.13.2",
+    "lodash": "^4.17.5",
+    "pouchdb": "^6.4.3",
+    "pouchdb-find": "^6.4.3",
+    "pouchdb-upsert": "^2.2.0",
+    "uuid": "^3.2.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.0.0-beta.42",
+    "@babel/core": "^7.0.0-beta.42",
+    "@babel/preset-env": "^7.0.0-beta.42"
+  }
+}

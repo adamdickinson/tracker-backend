@@ -1,0 +1,47 @@
+version: '3'
+services:
+
+
+  database:
+    build: ./database/
+    image: couchdb
+
+    expose:
+      - "5984"
+
+    ports:
+      - 7984:5984
+
+    volumes:
+      - ./database/data:/opt/couchdb/data
+
+    environment:
+      - COUCHDB_USER=renegade
+      - COUCHDB_PASSWORD=sample123
+
+
+  index:
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2
+    environment:
+      - discovery.type=single-node
+
+    expose:
+      - "9200"
+      - "9300"
+
+    ports:
+      - 9200:9200
+      - 9300:9300
+
+
+  link:
+    build: ./link/
+    depends_on:
+      - "database"
+      - "index"
+
+    expose:
+      - "9600"
+
+    volumes:
+      - ./link/config/pipeline.conf:/usr/share/logstash/pipeline/logstash.conf

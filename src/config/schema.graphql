@@ -1,0 +1,207 @@
+interface User {
+  _id:       ID!
+  _rev:      String!
+  firstName: String!
+  lastName:  String!
+  photoUrl:  String
+  position:  String
+}
+
+type Athlete implements User {
+  _id:            ID!
+  _rev:           String!
+  age:            Int!
+  dateOfBirth:    String!
+  firstName:      String!
+  graduatingYear: Int!
+  groups:         [Group]!
+  lastName:       String!
+  photoUrl:       String
+  position:       String
+}
+
+type Coach implements User {
+  _id:       ID!
+  _rev:      String!
+  firstName: String!
+  lastName:  String!
+  photoUrl:  String
+  position:  String
+}
+
+type Guest implements User {
+  _id:       ID!
+  _rev:      String!
+  firstName: String!
+  lastName:  String!
+  photoUrl:  String
+  position:  String
+}
+
+type Measurement {
+  _id:             ID!
+  _rev:            String!
+  athlete:         Athlete!
+  date:            String!
+  height:          Float!
+  heightWithShoes: Float!
+  weight:          Float!
+  wingspan:        Float!
+  standingReach:   Float!
+  bodyFat:         Float!
+  handLength:      Float!
+  handWidth:       Float!
+}
+
+type Group {
+  _id:      ID!
+  _rev:     String!
+  name:     String!
+  athletes: [Athlete]
+}
+
+type Result {
+  _id:     ID!
+  _rev:    String!
+  value:   Float!
+  athlete: Athlete!
+  date:    String!
+  test:    Test!
+  variation: String
+}
+
+type ShootingResult {
+  _id:        ID!
+  _rev:       String!
+  athlete:    Athlete!
+  attempts:   [ShootingAttempt]
+  date:       String!
+  test:       Test!
+  variation: String
+}
+
+type ShootingAttempt {
+  _id:  ID!
+  _rev: String!
+  made: Boolean!
+  time: Int
+}
+
+type Test {
+  _id:        ID!
+  _rev:       String!
+  name:       String!
+  variations: [TestVariation!]! 
+  maxResult:  Float
+  minResult:  Float
+  duration:   Float
+  distance:   Float
+  groupTest:  Boolean!
+}
+
+type TestVariation {
+  name:       String!
+  maxResult:  Float
+  minResult:  Float
+  duration:   Float
+  distance:   Float
+  groupTest:  Boolean
+}
+
+type TestMetric {
+  _id:        ID!
+  _rev:       String!
+  goodResult: Float!
+  badResult:  Float!
+  test:       Test!
+  gradeYear:  Int
+  group:      Group
+}
+
+
+union CurrentUserResult = Athlete | Coach | Guest 
+
+
+type Query {
+  coach(id:String!): Coach
+  currentUser: CurrentUserResult
+  findAthletes(query: String!): [Athlete!]!
+  findGroups(query: String!): [Group!]!
+  hello: String!
+  test(name: String!): Test
+}
+
+
+
+input AthleteInput {
+  dateOfBirth:    String!
+  firstName:      String!
+  graduatingYear: Int!
+  lastName:       String!
+  photoUrl:       String
+  position:       String
+}
+
+
+
+input GroupInput {
+  name: String!
+}
+
+
+
+input ResultInput {
+  value:     Float!
+  athlete:   ID!
+  date:      String!
+  test:      String!
+  variation: String
+}
+
+
+
+input ShootingAttemptInput {
+  made: Boolean!
+  time: Int
+}
+
+
+
+input ShootingResultInput {
+  athlete:    String!
+  attempts:   [ShootingAttemptInput]
+  date:       String!
+  test:       String!
+  variation:  String
+}
+
+
+
+input MeasurementInput {
+  athlete:         ID!
+  bodyFat:         Float!
+  date:            String!
+  handLength:      Float!
+  handWidth:       Float!
+  height:          Float!
+  heightWithShoes: Float!
+  standingReach:   Float!
+  weight:          Float!
+  wingspan:        Float!
+}
+
+
+
+type Mutation {
+  addAthleteToGroup(athlete: ID!, group: ID!): Group
+  removeAthleteFromGroup(athlete: ID!, group: ID!): Group
+  createAthlete(athlete: AthleteInput): Athlete
+  updateAthlete(_id: ID!, athlete: AthleteInput): Athlete
+  createGroup(group: GroupInput!): Group
+  updateGroup(_id: ID!, group: GroupInput!): Group
+  recordMeasurement(measurement: MeasurementInput!): Measurement
+  recordResult(result: ResultInput): Result
+  recordResults(results: [ResultInput!]!): [Result]
+  recordShootingResult(result: ShootingResultInput): ShootingResult
+  recordShootingResults(results: [ShootingResultInput!]!): [ShootingResult]
+}
