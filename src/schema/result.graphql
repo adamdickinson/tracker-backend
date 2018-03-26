@@ -1,0 +1,6 @@
+interface Result {
+  id:        ID!
+  athlete:   Athlete!
+  date:      String!
+  test:      Test!
+}

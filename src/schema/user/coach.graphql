@@ -1,0 +1,28 @@
+type Coach implements User {
+  id:        ID!
+  firstName: String!
+  lastName:  String!
+  photoUrl:  String
+  position:  String
+}
+
+type Query {
+  coach(id:String!): Coach
+  searchCoaches(query: String!): [Coach!]!
+}
+
+
+
+input CoachInput {
+  firstName:      String!
+  lastName:       String!
+  photoUrl:       String
+  position:       String
+}
+
+type Mutation {
+  createCoach(coach: CoachInput): Coach!
+  deleteCoach(id: ID!): Coach!
+  restoreCoach(id: ID!): Coach!
+  updateCoach(id: ID!, coach: CoachInput): Coach!
+}

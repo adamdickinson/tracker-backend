@@ -1,0 +1,25 @@
+type Group {
+  id:       ID!
+  name:     String!
+  athletes: [Athlete!]!
+}
+
+type Query {
+  group(id: ID!): Group!
+  searchGroups(query: String!): [Group!]!
+}
+
+
+
+input GroupInput {
+  name: String!
+}
+
+type Mutation {
+  createGroup(group: GroupInput!): Group!
+  deleteGroup(id: ID!): Boolean! 
+  updateGroup(id: ID!, group: GroupInput!): Group!
+
+  addAthleteToGroup(athlete: ID!, group: ID!): Group!
+  removeAthleteFromGroup(athlete: ID!, group: ID!): Group!
+}

@@ -1,0 +1,26 @@
+type Guest implements User {
+  id:        ID!
+  firstName: String!
+  lastName:  String!
+}
+
+type Query {
+  guest(id:String!): Guest
+  searchGuests(query: String!): [Guest!]!
+}
+
+
+
+input GuestInput {
+  firstName:      String!
+  lastName:       String!
+}
+
+
+
+type Mutation {
+  createGuest(guest: GuestInput): Guest!
+  deleteGuest(id: ID!): Guest!
+  restoreGuest(id: ID!): Guest!
+  updateGuest(id: ID!, guest: GuestInput): Guest!
+}

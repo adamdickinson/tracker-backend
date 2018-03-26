@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.findGroups = exports.updateGroup = exports.createGroup = exports.removeAthleteFromGroup = exports.addAthleteToGroup = void 0;
+exports.updateGroup = exports.searchGroups = exports.removeAthleteFromGroup = exports.group = exports.deleteGroup = exports.createGroup = exports.addAthleteToGroup = void 0;
 
 var _elasticsearch = _interopRequireDefault(require("../config/elasticsearch"));
 
@@ -29,37 +29,10 @@ const addAthleteToGroup = async ({
     athletes: (0, _uniq.default)([...latest.athletes, athlete])
   }));
   group = await _pouchdb.default.get(group);
-  const athleteRows = await _pouchdb.default.allDocs({
-    include_docs: true,
-    keys: group.athletes
-  });
-  const athletes = athleteRows.rows.map(row => row.doc);
-  return _objectSpread({}, group, {
-    athletes
-  });
+  return prepareGroup((await _pouchdb.default.get(_id)));
 };
 
 exports.addAthleteToGroup = addAthleteToGroup;
-
-const removeAthleteFromGroup = async ({
-  athlete,
-  group
-}) => {
-  await _pouchdb.default.upsert(group, latest => _objectSpread({}, latest, {
-    athletes: latest.athletes.filter(id => id != athlete)
-  }));
-  group = await _pouchdb.default.get(group);
-  const athleteRows = await _pouchdb.default.allDocs({
-    include_docs: true,
-    keys: group.athletes
-  });
-  const athletes = athleteRows.rows.map(row => row.doc);
-  return _objectSpread({}, group, {
-    athletes
-  });
-};
-
-exports.removeAthleteFromGroup = removeAthleteFromGroup;
 
 const createGroup = async ({
   group
@@ -68,22 +41,56 @@ const createGroup = async ({
   await _pouchdb.default.put(_objectSpread({
     _id
   }, group));
-  return _pouchdb.default.get(_id);
+  return prepareGroup((await _pouchdb.default.get(_id)));
 };
 
 exports.createGroup = createGroup;
 
-const updateGroup = async ({
-  _id,
-  group
+const deleteGroup = async ({
+  id
 }) => {
-  await _pouchdb.default.upsert(_id, latest => _objectSpread({}, latest, group));
-  return _pouchdb.default.get(_id);
+  if (!id.startsWith("Group:")) return null;
+  const group = await _pouchdb.default.get(id);
+  await _pouchdb.default.remove(group);
+  return prepareGroup(group);
 };
 
-exports.updateGroup = updateGroup;
+exports.deleteGroup = deleteGroup;
 
-const findGroups = async ({
+const group = async ({
+  id
+}) => {
+  if (!id.startsWith("Group:")) return null;
+  return prepareGroup((await _pouchdb.default.get(id)));
+};
+
+exports.group = group;
+
+const prepareGroup = async group => {
+  // Resolve athletes
+  const athleteRows = await _pouchdb.default.allDocs({
+    include_docs: true,
+    keys: group.athletes
+  });
+  const athletes = athleteRows.rows.map(row => row.doc);
+  group.athletes = unpouchDocs(athletes); // Tidy doc
+
+  return unpouchDoc(group);
+};
+
+const removeAthleteFromGroup = async ({
+  athlete,
+  group
+}) => {
+  await _pouchdb.default.upsert(group, latest => _objectSpread({}, latest, {
+    athletes: latest.athletes.filter(id => id != athlete)
+  }));
+  return prepareGroup((await _pouchdb.default.get(_id)));
+};
+
+exports.removeAthleteFromGroup = removeAthleteFromGroup;
+
+const searchGroups = async ({
   query
 }) => {
   const response = await _elasticsearch.default.search({
@@ -106,20 +113,18 @@ const findGroups = async ({
       }
     }
   });
-  let groups = response.hits.hits.length ? response.hits.hits.map(hit => hit._source.doc) : [];
-  const athleteIds = (0, _uniq.default)((0, _flatMap.default)(groups, group => group.athletes).filter(a => !!a));
-  const athletes = await _pouchdb.default.allDocs({
-    include_docs: true,
-    keys: athleteIds
-  });
-  const athletesById = (0, _keyBy.default)(athletes.rows.map(athlete => athlete.doc), "_id");
-  groups = groups.map(group => {
-    if (!group.athletes) return group;
-    return _objectSpread({}, group, {
-      athletes: group.athletes.map(id => athletesById[id])
-    });
-  });
-  return groups;
+  const groups = response.hits.hits.length ? response.hits.hits.map(hit => hit._source.doc) : [];
+  return Promise.all(groups.map(prepareGroup));
 };
 
-exports.findGroups = findGroups;
+exports.searchGroups = searchGroups;
+
+const updateGroup = async ({
+  _id,
+  group
+}) => {
+  await _pouchdb.default.upsert(_id, latest => _objectSpread({}, latest, group));
+  return prepareGroup((await _pouchdb.default.get(_id)));
+};
+
+exports.updateGroup = updateGroup;

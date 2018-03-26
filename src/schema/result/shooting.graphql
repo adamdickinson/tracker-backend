@@ -1,0 +1,37 @@
+type ShootingResult implements Result {
+  id:        ID!
+  athlete:   Athlete!
+  date:      String!
+  test:      Test!
+
+  attempts:  [ShootingAttempt!]!
+}
+
+type ShootingAttempt {
+  id:   ID!
+  made: Boolean!
+  time: Float 
+}
+
+type Query {
+  shootingResult(id: ID!): ShootingResult
+}
+
+
+
+input ShootingResultInput {
+  athlete:   ID!
+  date:      String!
+  test:      ID!
+
+  attempts:  [ShootingAttemptInput!]!
+}
+
+input ShootingAttemptInput {
+  made: Boolean!
+  time: Float
+}
+
+type Mutation {
+  recordShootingResult(result: ShootingResultInput!): ShootingResult!
+}

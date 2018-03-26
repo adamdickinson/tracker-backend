@@ -1,0 +1,28 @@
+type TimeResult implements Result {
+  id:        ID!
+  athlete:   Athlete!
+  date:      String!
+  test:      Test!
+
+  time:      Float!
+}
+
+type Query {
+  timeResult(id: ID!): TimeResult
+}
+
+
+
+input TimeResultInput {
+  athlete: ID!
+  date:    String!
+  test:    ID!
+
+  time:    Float!
+}
+
+
+
+type Mutation {
+  recordTimeResult(result: TimeResultInput!): TimeResult!
+}

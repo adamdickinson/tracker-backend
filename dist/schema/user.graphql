@@ -1,0 +1,15 @@
+interface User {
+  id:        ID!
+  firstName: String!
+  lastName:  String!
+}
+
+
+
+union CurrentUserResult = Athlete | Coach | Guest 
+
+
+
+type Query {
+  currentUser: CurrentUserResult
+}

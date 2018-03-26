@@ -1,0 +1,45 @@
+enum TestLimitMetric {
+  TIME
+  DISTANCE
+}
+
+
+
+enum ResultType {
+  STAGE_SHUTTLE
+  SHOTS
+  MEASUREMENTS
+  TIME
+  SPLIT
+}
+
+
+
+type Test {
+  id:         ID!
+  name:       String!
+  variation:  String
+  limit:      TestLimit
+  resultType: ResultType!
+  groupTest:  Boolean!
+}
+
+type TestLimit {
+  metric: TestLimitMetric!
+  value:  Float!
+}
+
+type TestContext {
+  id:         ID!
+  goodResult: Float!
+  badResult:  Float!
+  test:       Test!
+  gradeYear:  Int
+  group:      Group
+}
+
+
+
+type Query {
+  test(id: ID!): Test
+}

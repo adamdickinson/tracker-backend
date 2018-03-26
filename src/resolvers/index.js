@@ -1,8 +1,7 @@
 export default {
-  ...require("./hello"),
-  ...require("./athlete"),
-  ...require("./user"),
   ...require("./group"),
+  ...require("./hello"),
+  ...require("./result").default,
   ...require("./test"),
-  ...require("./result"),
+  ...require("./user").default,
 }

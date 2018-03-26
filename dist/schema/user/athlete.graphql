@@ -1,0 +1,34 @@
+type Athlete implements User {
+  id:             ID!
+  age:            Int!
+  dateOfBirth:    String!
+  firstName:      String!
+  graduatingYear: Int!
+  groups:         [Group]!
+  lastName:       String!
+  photoUrl:       String
+  position:       String
+}
+
+type Query {
+  athlete(id:String!): Athlete
+  searchAthletes(query: String!): [Athlete!]!
+}
+
+
+
+input AthleteInput {
+  dateOfBirth:    String!
+  firstName:      String!
+  graduatingYear: Int!
+  lastName:       String!
+  photoUrl:       String
+  position:       String
+}
+
+type Mutation {
+  createAthlete(athlete: AthleteInput): Athlete!
+  deleteAthlete(id: ID!): Athlete!
+  restoreAthlete(id: ID!): Athlete!
+  updateAthlete(id: ID!, athlete: AthleteInput): Athlete!
+}

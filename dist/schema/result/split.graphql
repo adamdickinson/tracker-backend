@@ -1,0 +1,26 @@
+type SplitResult implements Result {
+  id:      ID!
+  athlete: Athlete!
+  date:    String!
+  test:    Test!
+
+  splits:  [Float!]!
+}
+
+type Query {
+  splitResult(id: ID!): SplitResult
+}
+
+
+
+input SplitResultInput {
+  athlete: ID!
+  date:    String!
+  test:    ID!
+
+  splits:  [Float!]!
+}
+
+type Mutation {
+  recordSplitResult(result: SplitResultInput!): SplitResult!
+}

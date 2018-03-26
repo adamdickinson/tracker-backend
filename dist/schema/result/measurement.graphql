@@ -1,0 +1,40 @@
+type MeasurementResult implements Result {
+  id:              ID!
+  athlete:         Athlete!
+  date:            String!
+  test:            Test!
+
+  height:          Float!
+  heightWithShoes: Float!
+  weight:          Float!
+  wingspan:        Float!
+  standingReach:   Float!
+  bodyFat:         Float!
+  handLength:      Float!
+  handWidth:       Float!
+}
+
+type Query {
+  measurementResult(id: ID!): MeasurementResult
+}
+
+
+
+input MeasurementResultInput {
+  athlete:         ID!
+  date:            String!
+  test:            ID!
+
+  height:          Float!
+  heightWithShoes: Float!
+  weight:          Float!
+  wingspan:        Float!
+  standingReach:   Float!
+  bodyFat:         Float!
+  handLength:      Float!
+  handWidth:       Float!
+}
+
+type Mutation {
+  recordMeasurementResult(result: MeasurementResultInput!): MeasurementResult!
+}

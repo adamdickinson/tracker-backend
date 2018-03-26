@@ -1,15 +1,8 @@
 import express from "express"
 import graphqlHTTP from "express-graphql"
 import resolvers from "./resolvers"
-import { buildSchema } from "graphql"
-import { readFileSync } from "fs"
-import { join } from "path"
+import schema from "./schema"
 import cors from "cors"
-
-
-// Load schema
-const rawSchema = readFileSync( join(__dirname, "config", "schema.graphql"), "utf8" )
-const schema = buildSchema(rawSchema)
 
 
 

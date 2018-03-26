@@ -1,0 +1,31 @@
+type StageShuttleResult implements Result {
+  id:        ID!
+  athlete:   Athlete!
+  date:      String!
+  test:      Test!
+
+  stage:     Int!
+  shuttle:   Int!
+}
+
+type Query {
+  stageShuttleResult(id: ID!): StageShuttleResult
+}
+
+
+
+input StageShuttleResultInput {
+  athlete: ID!
+  date:    String!
+  test:    ID!
+
+  stage:   Int!
+  shuttle: Int!
+}
+
+
+
+
+type Mutation {
+  recordStageShuttleResult(result: StageShuttleResultInput!): StageShuttleResult!
+}

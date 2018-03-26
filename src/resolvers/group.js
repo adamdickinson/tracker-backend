@@ -9,21 +9,7 @@ import uniq from "lodash/uniq"
 export const addAthleteToGroup = async ({ athlete, group }) => {
   await pouchdb.upsert(group, latest => ({ ...latest, athletes: uniq([...latest.athletes, athlete]) }))
   group = await pouchdb.get(group)
-
-  const athleteRows = await pouchdb.allDocs({ include_docs: true, keys: group.athletes })
-  const athletes = athleteRows.rows.map(row => row.doc)
-  return { ...group, athletes }
-}
-
-
-
-export const removeAthleteFromGroup = async ({ athlete, group }) => {
-  await pouchdb.upsert(group, latest => ({ ...latest, athletes: latest.athletes.filter(id => id != athlete) }))
-  group = await pouchdb.get(group)
-
-  const athleteRows = await pouchdb.allDocs({ include_docs: true, keys: group.athletes })
-  const athletes = athleteRows.rows.map(row => row.doc)
-  return { ...group, athletes }
+  return prepareGroup(await pouchdb.get(_id))
 }
 
 
@@ -31,19 +17,48 @@ export const removeAthleteFromGroup = async ({ athlete, group }) => {
 export const createGroup = async ({ group }) => {
   const _id = `Group:${uuid()}`
   await pouchdb.put({ _id, ...group })
-  return pouchdb.get(_id)
+  return prepareGroup(await pouchdb.get(_id))
 }
 
 
 
-export const updateGroup = async ({ _id, group }) => {
-  await pouchdb.upsert(_id, latest => ({ ...latest, ...group }))
-  return pouchdb.get(_id)
+export const deleteGroup = async ({ id }) => {
+  if( !id.startsWith("Group:") ) return null
+  const group = await pouchdb.get(id)
+  await pouchdb.remove(group)
+  return prepareGroup(group)
 }
 
 
 
-export const findGroups = async ({ query }) => {
+export const group = async ({ id }) => {
+  if( !id.startsWith("Group:") ) return null
+  return prepareGroup(await pouchdb.get(id))
+}
+
+
+const prepareGroup = async group => {
+
+  // Resolve athletes
+  const athleteRows = await pouchdb.allDocs({ include_docs: true, keys: group.athletes })
+  const athletes = athleteRows.rows.map(row => row.doc)
+  group.athletes = unpouchDocs(athletes)
+
+  // Tidy doc
+  return unpouchDoc(group)
+
+}
+
+
+
+export const removeAthleteFromGroup = async ({ athlete, group }) => {
+  await pouchdb.upsert(group, latest => ({ ...latest, athletes: latest.athletes.filter(id => id != athlete) }))
+  return prepareGroup(await pouchdb.get(_id))
+}
+
+
+
+export const searchGroups = async ({ query }) => {
   const response = await client.search({
     body: {
       query: {
@@ -63,19 +78,16 @@ export const findGroups = async ({ query }) => {
     }
   })
 
-  let groups = response.hits.hits.length
+  const groups = response.hits.hits.length
     ? response.hits.hits.map(hit => hit._source.doc)
     : []
+  
+  return Promise.all(groups.map(prepareGroup))
+}
 
 
-  const athleteIds   = uniq(flatMap(groups, group => group.athletes).filter(a => !!a))
-  const athletes     = await pouchdb.allDocs({ include_docs: true, keys: athleteIds })
-  const athletesById = keyBy(athletes.rows.map(athlete => athlete.doc), "_id")
 
-  groups = groups.map(group => {
-    if(!group.athletes) return group
-    return { ...group, athletes: group.athletes.map(id => athletesById[id]) }
-  })
-
-  return groups
+export const updateGroup = async ({ _id, group }) => {
+  await pouchdb.upsert(_id, latest => ({ ...latest, ...group }))
+  return prepareGroup(await pouchdb.get(_id))
 }
