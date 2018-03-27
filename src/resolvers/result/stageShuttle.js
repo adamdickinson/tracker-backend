@@ -16,3 +16,8 @@ export const recordStageShuttleResult = async ({ result }) => {
   await pouchdb.put({ _id, ...result })
   return prepareResult(await pouchdb.get(_id))
 }
+
+
+
+export const recordStageShuttleResults = async ({ results }) => 
+  results.map(result => recordStageShuttleResult({ result }))

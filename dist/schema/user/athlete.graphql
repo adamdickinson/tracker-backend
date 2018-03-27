@@ -10,9 +10,42 @@ type Athlete implements User {
   position:       String
 }
 
+type AthleteReport {
+  athlete: Athlete!
+  results: AthleteResults!
+}
+
+type AthleteResults {
+  agility: String
+  beep: String
+  bodyFat: String
+  handLength: String
+  handWidth: String
+  height: String
+  heightWithShoes: String
+  laneAgility: String
+  maxVerticalLeap: String
+  shooting45Degree: String 
+  shootingBaseLine: String 
+  shootingElbow: String 
+  shootingFreeThrow: String 
+  shootingThreePointBaseline: String 
+  shootingThreePointWing: String 
+  speed: String
+  standingReach: String
+  standingVerticalLeap: String
+  timeTrial2km: String
+  timeTrial3km: String
+  timeTrial5km: String
+  weight: String
+  wingspan: String
+}
+
 type Query {
+  allAthletesReports: [AthleteReport!]!
   athlete(id:String!): Athlete
-  searchAthletes(query: String!): [Athlete!]!
+  athletes: [Athlete!]!
+  searchAthletes(query:String!): [Athlete!]!
 }
 
 
@@ -32,3 +65,7 @@ type Mutation {
   restoreAthlete(id: ID!): Athlete!
   updateAthlete(id: ID!, athlete: AthleteInput): Athlete!
 }
+
+
+
+

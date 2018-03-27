@@ -3,17 +3,23 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.updateAthlete = exports.searchAthletes = exports.restoreAthlete = exports.deleteAthlete = exports.createAthlete = exports.athlete = void 0;
+exports.updateAthlete = exports.searchAthletes = exports.restoreAthlete = exports.deleteAthlete = exports.createAthlete = exports.allAthletesReports = exports.athletesReports = exports.athletes = exports.athlete = void 0;
 
 var _elasticsearch = _interopRequireDefault(require("../../config/elasticsearch"));
 
-var _pouchdb = _interopRequireWildcard(require("../../config/pouchdb"));
+var _keyBy = _interopRequireDefault(require("lodash/keyBy"));
+
+var _moment = _interopRequireDefault(require("moment"));
+
+var _pouchdb = _interopRequireDefault(require("../../config/pouchdb"));
 
 var _uniq = _interopRequireDefault(require("lodash/uniq"));
 
 var _v = _interopRequireDefault(require("uuid/v1"));
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+var _camelcase = _interopRequireDefault(require("camelcase"));
+
+var _pouchdb2 = require("../../helpers/pouchdb");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -29,6 +35,45 @@ const athlete = async ({
 };
 
 exports.athlete = athlete;
+
+const athletes = async ({
+  id
+}) => {
+  const allAthletes = await _pouchdb.default.allDocs({
+    startkey: "Athlete:",
+    endkey: "Athlete:\uffff",
+    include_docs: true
+  });
+  const athletes = await Promise.all(allAthletes.rows.map(row => prepareAthlete(row.doc)));
+  return athletes.sort((a, b) => a.firstName.localeCompare(b.firstName) || a.lastName.localeCompare(b.lastName));
+};
+
+exports.athletes = athletes;
+
+const athletesReports = async ({
+  ids
+}) => {
+  const results = await _pouchdb.default.allDocs({
+    keys: ids,
+    include_docs: true
+  });
+  const athletes = results.rows.map(row => row.doc);
+  return getAthletesReports(athletes);
+};
+
+exports.athletesReports = athletesReports;
+
+const allAthletesReports = async () => {
+  const results = await _pouchdb.default.allDocs({
+    startkey: "Athlete:",
+    endkey: "Athlete:\uffff",
+    include_docs: true
+  });
+  const athletes = results.rows.map(row => row.doc);
+  return getAthletesReports(athletes);
+};
+
+exports.allAthletesReports = allAthletesReports;
 
 const createAthlete = async ({
   athlete
@@ -50,8 +95,70 @@ const deleteAthlete = async ({
 
 exports.deleteAthlete = deleteAthlete;
 
+const getAthletesReports = async athletes => {
+  // Build final reports structure
+  const reports = {};
+
+  for (let athlete of athletes) reports[athlete._id] = {
+    athlete,
+    results: {}
+  };
+
+  const types = {
+    MeasurementResult: {
+      getKey: result => [result.athlete._id, result.test, result.specId].join("|"),
+      setResult: (result, results) => results[(0, _camelcase.default)(result.specId)] = result.value
+    },
+    TimeResult: {
+      getKey: result => [result.athlete._id, result.test].join("|"),
+      setResult: (result, results) => results[(0, _camelcase.default)(result.test.split(":", 2)[1])] = (result.time / 1000).toFixed(3)
+    },
+    StageShuttleResult: {
+      getKey: result => [result.athlete._id, result.test].join("|"),
+      setResult: (result, results) => results[(0, _camelcase.default)(result.test.split(":", 2)[1])] = `${result.stage}.${result.shuttle}`
+    }
+  };
+
+  for (let prefix of Object.keys(types)) {
+    let {
+      getKey,
+      setResult
+    } = types[prefix];
+    let rawResults = await getAthletesResults(athletes, prefix);
+    let results = {};
+
+    for (let result of rawResults) {
+      const key = getKey(result);
+      if (!(key in results) || result.date > results[key].date) results[key] = result;
+    }
+
+    for (let result of Object.values(results)) setResult(result, reports[result.athlete._id].results);
+  }
+
+  return Object.values(reports);
+};
+
+const getAthletesResults = async (athletes, resultPrefix) => {
+  const athleteIds = athletes.map(athlete => athlete._id);
+  const results = (await _pouchdb.default.find({
+    selector: {
+      _id: {
+        $gt: `${resultPrefix}:`,
+        $lt: `${resultPrefix}:\uffff`
+      },
+      athlete: {
+        $in: athleteIds
+      }
+    }
+  })).docs;
+  athletes = (0, _keyBy.default)(athletes, "_id");
+  return results.map(result => _objectSpread({}, result, {
+    athlete: athletes[result.athlete]
+  }));
+};
+
 const prepareAthlete = async athlete => {
-  athlete = (0, _pouchdb.unpouchDoc)(athlete); // Load groups
+  athlete = (0, _pouchdb2.unpouchDoc)(athlete); // Load groups
 
   const groups = await _pouchdb.default.find({
     selector: {
@@ -66,7 +173,8 @@ const prepareAthlete = async athlete => {
       }
     }
   });
-  athlete.groups = (0, _pouchdb.unpouchDocs)(groups.docs);
+  athlete.age = (0, _moment.default)().diff((0, _moment.default)(athlete.dateOfBirth), "years");
+  athlete.groups = (0, _pouchdb2.unpouchDocs)(groups.docs);
   return athlete;
 };
 

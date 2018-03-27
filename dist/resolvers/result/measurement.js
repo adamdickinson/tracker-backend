@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.recordMeasurementResult = exports.measurementResult = void 0;
+exports.recordMeasurementResults = exports.recordMeasurementResult = exports.measurementResult = void 0;
 
 var _pouchdb = _interopRequireDefault(require("../../config/pouchdb"));
 
@@ -37,3 +37,11 @@ const recordMeasurementResult = async ({
 };
 
 exports.recordMeasurementResult = recordMeasurementResult;
+
+const recordMeasurementResults = ({
+  results
+}) => results.map(result => recordMeasurementResult({
+  result
+}));
+
+exports.recordMeasurementResults = recordMeasurementResults;

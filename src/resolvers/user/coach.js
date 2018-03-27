@@ -2,7 +2,7 @@ import client from "../../config/elasticsearch"
 import pouchdb from "../../config/pouchdb"
 import uniq from "lodash/uniq"
 import uuid from "uuid/v1"
-import { unpouchDoc, unpouchDocs } from "../../config/pouchdb"
+import { unpouchDoc, unpouchDocs } from "../../helpers/pouchdb"
 
 
 

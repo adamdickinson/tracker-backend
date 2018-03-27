@@ -16,3 +16,8 @@ export const recordTimeResult = async ({ result }) => {
   await pouchdb.put({ _id, ...result })
   return prepareResult(await pouchdb.get(_id))
 }
+
+
+
+export const recordTimeResults = async ({ results }) => 
+  results.map(result => recordTimeResult({ result }))

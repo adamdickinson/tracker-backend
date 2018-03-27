@@ -28,7 +28,7 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 const prepareResult = async result => {
-  result.test = (0, _pouchdb.unpouchDoc)(_tests.default.find(test => test.id = result.test));
+  result.test = (0, _pouchdb.unpouchDoc)(_tests.default.find(test => test.id == result.test));
   return (0, _pouchdb.unpouchDoc)(result);
 };
 

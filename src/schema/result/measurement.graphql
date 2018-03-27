@@ -3,15 +3,8 @@ type MeasurementResult implements Result {
   athlete:         Athlete!
   date:            String!
   test:            Test!
-
-  height:          Float!
-  heightWithShoes: Float!
-  weight:          Float!
-  wingspan:        Float!
-  standingReach:   Float!
-  bodyFat:         Float!
-  handLength:      Float!
-  handWidth:       Float!
+  specId:          String!
+  value:           Float!
 }
 
 type Query {
@@ -24,17 +17,11 @@ input MeasurementResultInput {
   athlete:         ID!
   date:            String!
   test:            ID!
-
-  height:          Float!
-  heightWithShoes: Float!
-  weight:          Float!
-  wingspan:        Float!
-  standingReach:   Float!
-  bodyFat:         Float!
-  handLength:      Float!
-  handWidth:       Float!
+  specId:          String!
+  value:           Float!
 }
 
 type Mutation {
   recordMeasurementResult(result: MeasurementResultInput!): MeasurementResult!
+  recordMeasurementResults(results: [MeasurementResultInput!]!): [MeasurementResult!]!
 }

@@ -25,4 +25,5 @@ input TimeResultInput {
 
 type Mutation {
   recordTimeResult(result: TimeResultInput!): TimeResult!
+  recordTimeResults(results: [TimeResultInput!]!): [TimeResult!]!
 }

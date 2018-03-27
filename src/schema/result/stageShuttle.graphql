@@ -28,4 +28,5 @@ input StageShuttleResultInput {
 
 type Mutation {
   recordStageShuttleResult(result: StageShuttleResultInput!): StageShuttleResult!
+  recordStageShuttleResults(results: [StageShuttleResultInput!]!): [StageShuttleResult!]!
 }

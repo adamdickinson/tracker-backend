@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.updateGroup = exports.searchGroups = exports.removeAthleteFromGroup = exports.group = exports.deleteGroup = exports.createGroup = exports.addAthleteToGroup = void 0;
+exports.updateGroup = exports.searchGroups = exports.removeAthleteFromGroup = exports.groups = exports.group = exports.deleteGroup = exports.createGroup = exports.addAthleteToGroup = void 0;
 
 var _elasticsearch = _interopRequireDefault(require("../config/elasticsearch"));
 
@@ -14,6 +14,12 @@ var _keyBy = _interopRequireDefault(require("lodash/keyBy"));
 var _pouchdb = _interopRequireDefault(require("../config/pouchdb"));
 
 var _uniq = _interopRequireDefault(require("lodash/uniq"));
+
+var _v = _interopRequireDefault(require("uuid/v1"));
+
+var _moment = _interopRequireDefault(require("moment"));
+
+var _pouchdb2 = require("../helpers/pouchdb");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -26,10 +32,10 @@ const addAthleteToGroup = async ({
   group
 }) => {
   await _pouchdb.default.upsert(group, latest => _objectSpread({}, latest, {
-    athletes: (0, _uniq.default)([...latest.athletes, athlete])
+    athletes: latest.athletes ? (0, _uniq.default)([...latest.athletes, athlete]) : [athlete]
   }));
   group = await _pouchdb.default.get(group);
-  return prepareGroup((await _pouchdb.default.get(_id)));
+  return prepareGroup(group);
 };
 
 exports.addAthleteToGroup = addAthleteToGroup;
@@ -37,7 +43,7 @@ exports.addAthleteToGroup = addAthleteToGroup;
 const createGroup = async ({
   group
 }) => {
-  const _id = `Group:${uuid()}`;
+  const _id = `Group:${(0, _v.default)()}`;
   await _pouchdb.default.put(_objectSpread({
     _id
   }, group));
@@ -66,16 +72,35 @@ const group = async ({
 
 exports.group = group;
 
+const groups = async ({
+  id
+}) => {
+  const allGroups = await _pouchdb.default.allDocs({
+    startkey: "Group:",
+    endkey: "Group:\uffff",
+    include_docs: true
+  });
+  return allGroups.rows.map(row => prepareGroup(row.doc));
+};
+
+exports.groups = groups;
+
 const prepareGroup = async group => {
   // Resolve athletes
-  const athleteRows = await _pouchdb.default.allDocs({
-    include_docs: true,
-    keys: group.athletes
-  });
-  const athletes = athleteRows.rows.map(row => row.doc);
-  group.athletes = unpouchDocs(athletes); // Tidy doc
+  if (group.athletes) {
+    const athleteRows = await _pouchdb.default.allDocs({
+      include_docs: true,
+      keys: group.athletes
+    });
+    const athletes = athleteRows.rows.map(row => row.doc);
+    athletes && athletes.map(athlete => _objectSpread({}, athlete, {
+      age: (0, _moment.default)().diff((0, _moment.default)(athlete.dateOfBirth), "years")
+    }));
+    group.athletes = (0, _pouchdb2.unpouchDocs)(athletes);
+  } else group.athletes = []; // Tidy doc
 
-  return unpouchDoc(group);
+
+  return (0, _pouchdb2.unpouchDoc)(group);
 };
 
 const removeAthleteFromGroup = async ({
@@ -85,7 +110,8 @@ const removeAthleteFromGroup = async ({
   await _pouchdb.default.upsert(group, latest => _objectSpread({}, latest, {
     athletes: latest.athletes.filter(id => id != athlete)
   }));
-  return prepareGroup((await _pouchdb.default.get(_id)));
+  group = await _pouchdb.default.get(group);
+  return prepareGroup(group);
 };
 
 exports.removeAthleteFromGroup = removeAthleteFromGroup;

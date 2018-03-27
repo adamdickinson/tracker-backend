@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.recordTimeResult = exports.timeResult = void 0;
+exports.recordTimeResults = exports.recordTimeResult = exports.timeResult = void 0;
 
 var _pouchdb = _interopRequireDefault(require("../../config/pouchdb"));
 
@@ -37,3 +37,11 @@ const recordTimeResult = async ({
 };
 
 exports.recordTimeResult = recordTimeResult;
+
+const recordTimeResults = async ({
+  results
+}) => results.map(result => recordTimeResult({
+  result
+}));
+
+exports.recordTimeResults = recordTimeResults;

@@ -7,13 +7,13 @@ exports.updateCoach = exports.searchCoaches = exports.restoreCoach = exports.del
 
 var _elasticsearch = _interopRequireDefault(require("../../config/elasticsearch"));
 
-var _pouchdb = _interopRequireWildcard(require("../../config/pouchdb"));
+var _pouchdb = _interopRequireDefault(require("../../config/pouchdb"));
 
 var _uniq = _interopRequireDefault(require("lodash/uniq"));
 
 var _v = _interopRequireDefault(require("uuid/v1"));
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+var _pouchdb2 = require("../../helpers/pouchdb");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -50,7 +50,7 @@ const deleteCoach = async ({
 
 exports.deleteCoach = deleteCoach;
 
-const prepareCoach = async coach => (0, _pouchdb.unpouchDoc)(coach);
+const prepareCoach = async coach => (0, _pouchdb2.unpouchDoc)(coach);
 
 const restoreCoach = async ({
   id

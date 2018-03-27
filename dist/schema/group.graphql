@@ -6,6 +6,7 @@ type Group {
 
 type Query {
   group(id: ID!): Group!
+  groups: [Group!]!
   searchGroups(query: String!): [Group!]!
 }
 

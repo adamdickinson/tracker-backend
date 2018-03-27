@@ -10,7 +10,7 @@ import * as time from "./time"
 
 
 export const prepareResult = async result => {
-  result.test = unpouchDoc(tests.find(test => test.id = result.test))
+  result.test = unpouchDoc(tests.find(test => test.id == result.test))
   return unpouchDoc(result)
 }
 

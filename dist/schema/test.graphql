@@ -5,6 +5,17 @@ enum TestLimitMetric {
 
 
 
+enum TestSpecMetric {
+  M_YD
+  M_FT
+  CM_IN
+  CM_FT
+  KG_LB
+  PERCENTAGE
+}
+
+
+
 enum ResultType {
   STAGE_SHUTTLE
   SHOTS
@@ -22,11 +33,18 @@ type Test {
   limit:      TestLimit
   resultType: ResultType!
   groupTest:  Boolean!
+  specs:      [TestSpec!]
 }
 
 type TestLimit {
   metric: TestLimitMetric!
   value:  Float!
+}
+
+type TestSpec {
+  id:     ID!
+  name:   String!
+  metric: TestSpecMetric!
 }
 
 type TestContext {
@@ -42,4 +60,5 @@ type TestContext {
 
 type Query {
   test(id: ID!): Test
+  tests: [Test!]!
 }
