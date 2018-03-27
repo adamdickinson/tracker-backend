@@ -21,7 +21,7 @@ PIDPATH="$SCRIPTPATH/.running.lck"
 
 clear
 echo -e $L"Tracker Backend"$W
-echo -e $DT"Starts up the tracker backend systems, ready for use."
+echo -e $DT"Stops the tracker backend services."
 echo -e $B"--------------------------------------------"$W
 echo ""
 
@@ -47,25 +47,5 @@ if [ -e $PIDPATH ]; then
   fi
 fi
 
-# Start services
-pushd $SCRIPTPATH/../docker > /dev/null
-echo -e $L"Starting docker services"$W
-echo -e $B"--------------------------------------------"$W
-docker-compose up -d
-echo
-popd > /dev/null
 
-pushd $SCRIPTPATH/.. > /dev/null
-echo -e $L"Installing missing packages"$W
-echo -e $B"--------------------------------------------"$W
-yarn install
-echo
-
-echo -e $L"Starting graphql service"$W
-echo -e $B"--------------------------------------------"$W
-yarn start &
-echo
-popd > /dev/null
-
-
-echo $! > $PIDPATH
+echo -e $L"Done"$W

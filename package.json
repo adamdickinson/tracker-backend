@@ -6,7 +6,11 @@
   "author": "Adam Dickinson <adam@renegadedigital.com.au>",
   "license": "MIT",
   "scripts": {
-    "start": "rm -R dist && babel src -d dist --copy-files && node dist/index.js"
+    "start": "rm -R dist && babel src -d dist --copy-files && node dist/start.js"
+  },
+  "bin": {
+    "start-tracker-backend": "./scripts/start.sh",
+    "stop-tracker-backend": "./scripts/stop.sh"
   },
   "dependencies": {
     "cors": "^2.8.4",
